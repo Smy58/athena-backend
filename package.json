@@ -4,6 +4,7 @@
   "description": "Backend API for D&D club Athena — NestJS + Prisma + PostgreSQL",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate",
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
