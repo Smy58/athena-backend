@@ -1,0 +1,302 @@
+// Athena D&D club — data model
+// Mirrors the localStorage "tables" already built on the frontend prototype:
+// users, characters, quests, guild contracts, shop, support topics, reviews.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Guild {
+  TOWER
+  LEAGUE
+  BLADE
+  CANDLE
+}
+
+enum QuestReward {
+  GOLD
+  ARTIFACT
+}
+
+enum TopicCategory {
+  PROBLEM
+  SUGGESTION
+}
+
+enum PurchaseCategory {
+  POTION
+  SNACK
+}
+
+enum ReviewType {
+  EVENT
+  QUEST
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  name               String   @unique
+  email              String   @unique
+  passwordHash       String
+  experience         String? // 'new' | 'mid' | 'exp' | 'dm'
+  guild              Guild?
+  completedContracts Int      @default(0)
+  fameStones         Int      @default(0)
+  finiki             Int      @default(30)
+  activeTitle        String?
+  titles             String[] @default([])
+  isAdmin            Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  characters     Character[]
+  questsCreated  Quest[]         @relation("QuestCreator")
+  questSignups   QuestSignup[]
+  guildContracts GuildContract[]
+  topicsCreated  Topic[]
+  messages       Message[]
+  reviews        Review[]
+  purchases      Purchase[]
+}
+
+model Character {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  species      String
+  speciesTrait String?
+  className    String
+  background   String
+  bgFeat       String?
+  bonusNote    String?
+  level        Int      @default(1)
+  str          Int
+  dex          Int
+  con          Int
+  int          Int
+  wis          Int
+  cha          Int
+  maxHp        Int
+  curHp        Int
+  tempHp       Int      @default(0)
+  ac           Int
+  bio          String?
+  skills       String[] @default([])
+  saves        String[] @default([])
+  spell        Json? // { type, slots|count/level }
+  spellUsed    Json? // per-level used pips
+  deathSaves   Json? // { success, fail }
+  createdAt    DateTime @default(now())
+
+  inventory   InventoryItem[]
+  notes       CharacterNote[]
+  rollHistory RollLog[]
+
+  @@index([userId])
+}
+
+model InventoryItem {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  name        String
+  qty         Int       @default(1)
+}
+
+model CharacterNote {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  updatedAt   DateTime  @updatedAt
+}
+
+model RollLog {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  type        String // 'die' | 'save' | 'skill' | 'death'
+  label       String
+  formula     String?
+  result      String
+  createdAt   DateTime  @default(now())
+
+  @@index([characterId])
+}
+
+model Quest {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  date        String
+  time        String
+  rewardType  QuestReward
+  rewardValue String
+  completed   Boolean     @default(false)
+  completedAt DateTime?
+  createdById String
+  createdBy   User        @relation("QuestCreator", fields: [createdById], references: [id])
+  createdAt   DateTime    @default(now())
+
+  signups QuestSignup[]
+  reviews Review[]
+}
+
+model QuestSignup {
+  id        String   @id @default(cuid())
+  questId   String
+  quest     Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([questId, userId])
+}
+
+model GuildContract {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guild      Guild
+  rank       String // 'r1' | 'r2' | 'r3' | 'special' | 'fail'
+  fameStones Int
+  finiki     Int
+  createdAt  DateTime @default(now())
+
+  @@index([guild])
+}
+
+model Topic {
+  id          String        @id @default(cuid())
+  title       String
+  category    TopicCategory
+  createdById String
+  createdBy   User          @relation(fields: [createdById], references: [id])
+  createdAt   DateTime      @default(now())
+
+  messages Message[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  topicId   String
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([topicId])
+}
+
+model Review {
+  id        String     @id @default(cuid())
+  type      ReviewType
+  eventId   Int? // for type=EVENT, refers to the static schedule-history id
+  questId   String? // for type=QUEST
+  quest     Quest?     @relation(fields: [questId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User       @relation(fields: [authorId], references: [id])
+  rating    Int
+  text      String?
+  createdAt DateTime   @default(now())
+
+  @@unique([type, eventId, questId, authorId])
+}
+
+model Purchase {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId    String
+  name      String
+  category  PurchaseCategory
+  price     Int
+  redeemed  Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+}
+
+model Faq {
+  id        Int      @id @default(autoincrement())
+  question  String
+  answer    String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Master {
+  id               Int      @id @default(autoincrement())
+  name             String
+  icon             String
+  status           String
+  experienceLevel  String
+  gamesHostedCount Int      @default(0)
+  systems          String[] @default([])
+  genres           String[] @default([])
+  styleTags        String[] @default([])
+  beginnerFriendly Boolean  @default(false)
+  shortDescription String
+  fullDescription  String
+  pastGames        Json     @default("[]") // [{ title, date }]
+  createdAt        DateTime @default(now())
+}
+
+model GuildInfo {
+  id    Int   @id @default(autoincrement())
+  guild Guild @unique
+  name  String
+  icon  String
+  color String
+  role  String
+  bonus String
+  rank3 String
+}
+
+model GuildRank {
+  id         Int    @id @default(autoincrement())
+  value      String @unique // 'r1' | 'r2' | 'r3' | 'special' | 'fail'
+  label      String
+  fameStones Int
+  finiki     Int
+  order      Int    @default(0)
+}
+
+model Game {
+  id               Int      @id @default(autoincrement())
+  title            String
+  master           String
+  masterIcon       String
+  date             String
+  startTime        String
+  endTime          String
+  gameSystem       String
+  format           String
+  levelMin         Int?
+  levelMax         Int?
+  forBeginners     Boolean  @default(false)
+  totalSeats       Int
+  bookedSeats      Int      @default(0)
+  price            Int      @default(0)
+  currency         String   @default("₸")
+  shortDescription String
+  ageLimit         String?
+  createdAt        DateTime @default(now())
+}
+
+model ScheduleHistory {
+  id        Int      @id @default(autoincrement())
+  day       String
+  date      String
+  name      String
+  meta      String
+  typeLabel String
+  createdAt DateTime @default(now())
+}
