@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateQuestDto } from './dto/create-quest.dto';
 
 @Injectable()
 export class QuestsService {
@@ -28,8 +29,8 @@ export class QuestsService {
     });
   }
 
-  create(userId: string, data: any) {
-    return this.prisma.quest.create({ data: { ...data, createdById: userId } });
+  create(userId: string, dto: CreateQuestDto) {
+    return this.prisma.quest.create({ data: { ...dto, createdById: userId } });
   }
 
   async toggleSignup(questId: string, userId: string) {

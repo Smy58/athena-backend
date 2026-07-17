@@ -139,7 +139,7 @@ model Quest {
   id          String      @id @default(cuid())
   title       String
   description String?
-  date        String
+  date        DateTime    @db.Date
   time        String
   rewardType  QuestReward
   rewardValue String
@@ -279,7 +279,7 @@ model Game {
   title            String
   master           String
   masterIcon       String
-  date             String
+  date             DateTime @db.Date
   startTime        String
   endTime          String
   gameSystem       String
@@ -310,8 +310,7 @@ model GameSignup {
 
 model ScheduleHistory {
   id        Int      @id @default(autoincrement())
-  day       String
-  date      String
+  date      DateTime @db.Date
   name      String
   meta      String
   typeLabel String

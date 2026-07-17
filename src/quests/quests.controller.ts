@@ -13,6 +13,7 @@ import { AdminJwtAuthGuard } from '../admin-auth/guards/admin-jwt-auth.guard';
 import { RolesGuard } from '../admin-auth/guards/roles.guard';
 import { Roles } from '../admin-auth/decorators/roles.decorator';
 import { QuestsService } from './quests.service';
+import { CreateQuestDto } from './dto/create-quest.dto';
 
 @Controller('quests')
 export class QuestsController {
@@ -30,8 +31,8 @@ export class QuestsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Req() req: any, @Body() data: any) {
-    return this.questsService.create(req.user.userId, data);
+  create(@Req() req: any, @Body() dto: CreateQuestDto) {
+    return this.questsService.create(req.user.userId, dto);
   }
 
   @UseGuards(JwtAuthGuard)

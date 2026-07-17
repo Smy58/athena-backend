@@ -1,10 +1,11 @@
-import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsDate, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CreateGameDto {
   @IsString() title: string;
   @IsString() master: string;
   @IsString() masterIcon: string;
-  @IsString() date: string;
+  @Type(() => Date) @IsDate() date: Date;
   @IsString() startTime: string;
   @IsString() endTime: string;
   @IsString() gameSystem: string;
@@ -23,7 +24,7 @@ export class UpdateGameDto {
   @IsOptional() @IsString() title?: string;
   @IsOptional() @IsString() master?: string;
   @IsOptional() @IsString() masterIcon?: string;
-  @IsOptional() @IsString() date?: string;
+  @IsOptional() @Type(() => Date) @IsDate() date?: Date;
   @IsOptional() @IsString() startTime?: string;
   @IsOptional() @IsString() endTime?: string;
   @IsOptional() @IsString() gameSystem?: string;
@@ -39,16 +40,14 @@ export class UpdateGameDto {
 }
 
 export class CreateScheduleHistoryDto {
-  @IsString() day: string;
-  @IsString() date: string;
+  @Type(() => Date) @IsDate() date: Date;
   @IsString() name: string;
   @IsString() meta: string;
   @IsString() typeLabel: string;
 }
 
 export class UpdateScheduleHistoryDto {
-  @IsOptional() @IsString() day?: string;
-  @IsOptional() @IsString() date?: string;
+  @IsOptional() @Type(() => Date) @IsDate() date?: Date;
   @IsOptional() @IsString() name?: string;
   @IsOptional() @IsString() meta?: string;
   @IsOptional() @IsString() typeLabel?: string;
