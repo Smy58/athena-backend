@@ -52,6 +52,13 @@ export class ScheduleController {
     return this.scheduleService.removeGame(id);
   }
 
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MASTER')
+  @Delete('games/:id/signups/:userId')
+  removeGameSignup(@Param('id', ParseIntPipe) id: number, @Param('userId') userId: string) {
+    return this.scheduleService.removeGameSignup(id, userId);
+  }
+
   @Get('history')
   listHistory() {
     return this.scheduleService.listHistory();

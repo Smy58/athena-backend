@@ -9,6 +9,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminJwtAuthGuard } from '../admin-auth/guards/admin-jwt-auth.guard';
+import { RolesGuard } from '../admin-auth/guards/roles.guard';
+import { Roles } from '../admin-auth/decorators/roles.decorator';
 import { QuestsService } from './quests.service';
 
 @Controller('quests')
@@ -47,5 +50,12 @@ export class QuestsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.questsService.remove(id);
+  }
+
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MASTER')
+  @Delete(':id/signups/:userId')
+  removeSignup(@Param('id') id: string, @Param('userId') userId: string) {
+    return this.questsService.removeSignup(id, userId);
   }
 }

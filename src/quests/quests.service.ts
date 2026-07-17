@@ -8,7 +8,10 @@ export class QuestsService {
   findActive() {
     return this.prisma.quest.findMany({
       where: { completed: false },
-      include: { signups: true, createdBy: { select: { name: true } } },
+      include: {
+        signups: { include: { user: { select: { id: true, name: true } } } },
+        createdBy: { select: { name: true } },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -17,7 +20,7 @@ export class QuestsService {
     return this.prisma.quest.findMany({
       where: { completed: true },
       include: {
-        signups: true,
+        signups: { include: { user: { select: { id: true, name: true } } } },
         createdBy: { select: { name: true } },
         reviews: true,
       },
@@ -39,6 +42,14 @@ export class QuestsService {
     }
     await this.prisma.questSignup.create({ data: { questId, userId } });
     return { signedUp: true };
+  }
+
+  async removeSignup(questId: string, userId: string) {
+    const existing = await this.prisma.questSignup.findUnique({
+      where: { questId_userId: { questId, userId } },
+    });
+    if (!existing) throw new NotFoundException('Запись не найдена');
+    await this.prisma.questSignup.delete({ where: { id: existing.id } });
   }
 
   async complete(questId: string) {

@@ -18,7 +18,7 @@ export class ScheduleService {
 
   listGames() {
     return this.prisma.game.findMany({
-      include: { signups: true },
+      include: { signups: { include: { user: { select: { id: true, name: true } } } } },
       orderBy: { id: 'asc' },
     });
   }
@@ -42,6 +42,16 @@ export class ScheduleService {
     await this.prisma.gameSignup.create({ data: { gameId, userId } });
     await this.prisma.game.update({ where: { id: gameId }, data: { bookedSeats: { increment: 1 } } });
     return { signedUp: true };
+  }
+
+  async removeGameSignup(gameId: number, userId: string) {
+    const existing = await this.prisma.gameSignup.findUnique({
+      where: { gameId_userId: { gameId, userId } },
+    });
+    if (!existing) throw new NotFoundException('Запись не найдена');
+
+    await this.prisma.gameSignup.delete({ where: { id: existing.id } });
+    await this.prisma.game.update({ where: { id: gameId }, data: { bookedSeats: { decrement: 1 } } });
   }
 
   createGame(dto: CreateGameDto) {
