@@ -38,6 +38,11 @@ enum ReviewType {
   QUEST
 }
 
+enum AdminRole {
+  ADMIN
+  MASTER
+}
+
 model User {
   id                 String   @id @default(cuid())
   name               String   @unique
@@ -50,7 +55,6 @@ model User {
   finiki             Int      @default(30)
   activeTitle        String?
   titles             String[] @default([])
-  isAdmin            Boolean  @default(false)
   createdAt          DateTime @default(now())
 
   characters     Character[]
@@ -299,4 +303,12 @@ model ScheduleHistory {
   meta      String
   typeLabel String
   createdAt DateTime @default(now())
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  login        String    @unique
+  passwordHash String
+  role         AdminRole
+  createdAt    DateTime  @default(now())
 }

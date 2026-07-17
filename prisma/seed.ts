@@ -1,4 +1,6 @@
 import { PrismaClient, Guild } from '@prisma/client';
+import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -333,6 +335,16 @@ async function main() {
 
   await prisma.scheduleHistory.deleteMany();
   await prisma.scheduleHistory.createMany({ data: SCHEDULE_HISTORY });
+
+  const existingAdmin = await prisma.adminUser.findUnique({ where: { login: 'admin' } });
+  if (!existingAdmin) {
+    const password = crypto.randomBytes(9).toString('base64url');
+    const passwordHash = await bcrypt.hash(password, 10);
+    await prisma.adminUser.create({
+      data: { login: 'admin', passwordHash, role: 'ADMIN' },
+    });
+    console.log('Created admin user — login: admin, password:', password);
+  }
 
   console.log('Seed complete.');
 }

@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminJwtAuthGuard } from '../admin-auth/guards/admin-jwt-auth.guard';
+import { RolesGuard } from '../admin-auth/guards/roles.guard';
+import { Roles } from '../admin-auth/decorators/roles.decorator';
 import { FaqService } from './faq.service';
 import { CreateFaqDto, UpdateFaqDto } from './dto/faq.dto';
 
@@ -13,19 +14,22 @@ export class FaqController {
     return this.faqService.list();
   }
 
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Post()
   create(@Body() dto: CreateFaqDto) {
     return this.faqService.create(dto);
   }
 
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateFaqDto) {
     return this.faqService.update(id, dto);
   }
 
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.faqService.remove(id);
