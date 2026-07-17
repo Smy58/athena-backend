@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminJwtAuthGuard } from '../admin-auth/guards/admin-jwt-auth.guard';
 import { RolesGuard } from '../admin-auth/guards/roles.guard';
 import { Roles } from '../admin-auth/decorators/roles.decorator';
@@ -22,6 +23,12 @@ export class ScheduleController {
   @Get('games')
   listGames() {
     return this.scheduleService.listGames();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('games/:id/signup')
+  toggleSignup(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    return this.scheduleService.toggleGameSignup(id, req.user.userId);
   }
 
   @UseGuards(AdminJwtAuthGuard, RolesGuard)

@@ -60,6 +60,7 @@ model User {
   characters     Character[]
   questsCreated  Quest[]         @relation("QuestCreator")
   questSignups   QuestSignup[]
+  gameSignups    GameSignup[]
   guildContracts GuildContract[]
   topicsCreated  Topic[]
   messages       Message[]
@@ -293,6 +294,19 @@ model Game {
   shortDescription String
   ageLimit         String?
   createdAt        DateTime @default(now())
+
+  signups GameSignup[]
+}
+
+model GameSignup {
+  id        String   @id @default(cuid())
+  gameId    Int
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([gameId, userId])
 }
 
 model ScheduleHistory {
