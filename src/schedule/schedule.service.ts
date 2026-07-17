@@ -44,6 +44,22 @@ export class ScheduleService {
     return { signedUp: true };
   }
 
+  async addGameSignup(gameId: number, userId: string) {
+    const game = await this.prisma.game.findUnique({ where: { id: gameId } });
+    if (!game) throw new NotFoundException('Игра не найдена');
+    if (game.bookedSeats >= game.totalSeats) {
+      throw new BadRequestException('Свободных мест не осталось');
+    }
+
+    const existing = await this.prisma.gameSignup.findUnique({
+      where: { gameId_userId: { gameId, userId } },
+    });
+    if (existing) throw new BadRequestException('Игрок уже записан на эту игру');
+
+    await this.prisma.gameSignup.create({ data: { gameId, userId } });
+    await this.prisma.game.update({ where: { id: gameId }, data: { bookedSeats: { increment: 1 } } });
+  }
+
   async removeGameSignup(gameId: number, userId: string) {
     const existing = await this.prisma.gameSignup.findUnique({
       where: { gameId_userId: { gameId, userId } },

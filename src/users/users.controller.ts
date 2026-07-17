@@ -45,6 +45,13 @@ export class UsersController {
   }
 
   @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MASTER')
+  @Get('roster')
+  roster() {
+    return this.usersService.roster();
+  }
+
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Get(':id')
   get(@Param('id') id: string) {

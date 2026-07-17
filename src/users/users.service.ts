@@ -20,6 +20,13 @@ export class UsersService {
     return users.map(omitPasswordHash);
   }
 
+  roster() {
+    return this.prisma.user.findMany({
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+    });
+  }
+
   async update(id: string, dto: UpdateUserDto) {
     const updated = await this.prisma.user.update({ where: { id }, data: dto });
     return omitPasswordHash(updated);

@@ -54,6 +54,13 @@ export class ScheduleController {
 
   @UseGuards(AdminJwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'MASTER')
+  @Post('games/:id/signups')
+  addGameSignup(@Param('id', ParseIntPipe) id: number, @Body('userId') userId: string) {
+    return this.scheduleService.addGameSignup(id, userId);
+  }
+
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MASTER')
   @Delete('games/:id/signups/:userId')
   removeGameSignup(@Param('id', ParseIntPipe) id: number, @Param('userId') userId: string) {
     return this.scheduleService.removeGameSignup(id, userId);
