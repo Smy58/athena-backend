@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Guild } from '@prisma/client';
 import { omitPasswordHash } from '../common/omit-password';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -12,6 +13,20 @@ export class UsersService {
     if (!user) throw new NotFoundException('Пользователь не найден');
     const { passwordHash, ...safe } = user;
     return safe;
+  }
+
+  async list() {
+    const users = await this.prisma.user.findMany({ orderBy: { createdAt: 'desc' } });
+    return users.map(omitPasswordHash);
+  }
+
+  async update(id: string, dto: UpdateUserDto) {
+    const updated = await this.prisma.user.update({ where: { id }, data: dto });
+    return omitPasswordHash(updated);
+  }
+
+  async remove(id: string) {
+    await this.prisma.user.delete({ where: { id } });
   }
 
   async setGuild(userId: string, guild: Guild | null) {

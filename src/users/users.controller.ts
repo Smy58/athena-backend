@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Patch,
+  Delete,
   Body,
   UseGuards,
   Req,
@@ -9,7 +10,11 @@ import {
 } from '@nestjs/common';
 import { Guild } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminJwtAuthGuard } from '../admin-auth/guards/admin-jwt-auth.guard';
+import { RolesGuard } from '../admin-auth/guards/roles.guard';
+import { Roles } from '../admin-auth/decorators/roles.decorator';
 import { UsersService } from './users.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -30,5 +35,33 @@ export class UsersController {
   @Get('guild/:guild/members')
   guildMembers(@Param('guild') guild: Guild) {
     return this.usersService.guildMembers(guild);
+  }
+
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Get()
+  list() {
+    return this.usersService.list();
+  }
+
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Get(':id')
+  get(@Param('id') id: string) {
+    return this.usersService.findById(id);
+  }
+
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.update(id, dto);
+  }
+
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
   }
 }
