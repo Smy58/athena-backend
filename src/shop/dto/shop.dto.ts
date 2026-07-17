@@ -1,4 +1,4 @@
-import { IsIn, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CreateShopTitleDto {
   @IsString() id: string;
@@ -13,11 +13,24 @@ export class UpdateShopTitleDto {
   @IsOptional() @IsInt() order?: number;
 }
 
+export class CreateShopSectionDto {
+  @IsString() id: string;
+  @IsString() name: string;
+  @IsOptional() @IsString() icon?: string;
+  @IsOptional() @IsInt() order?: number;
+}
+
+export class UpdateShopSectionDto {
+  @IsOptional() @IsString() name?: string;
+  @IsOptional() @IsString() icon?: string;
+  @IsOptional() @IsInt() order?: number;
+}
+
 export class CreateShopItemDto {
   @IsString() id: string;
   @IsString() name: string;
   @IsInt() price: number;
-  @IsIn(['POTION', 'SNACK']) category: 'POTION' | 'SNACK';
+  @IsString() sectionId: string;
   @IsOptional() @IsInt() order?: number;
 }
 

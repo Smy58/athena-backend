@@ -9,7 +9,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { PurchaseCategory } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminJwtAuthGuard } from '../admin-auth/guards/admin-jwt-auth.guard';
 import { RolesGuard } from '../admin-auth/guards/roles.guard';
@@ -18,6 +17,8 @@ import { ShopService } from './shop.service';
 import {
   CreateShopTitleDto,
   UpdateShopTitleDto,
+  CreateShopSectionDto,
+  UpdateShopSectionDto,
   CreateShopItemDto,
   UpdateShopItemDto,
 } from './dto/shop.dto';
@@ -29,6 +30,11 @@ export class ShopController {
   @Get('catalog')
   catalog() {
     return this.shopService.catalog();
+  }
+
+  @Get('sections')
+  listSections() {
+    return this.shopService.listSections();
   }
 
   @UseGuards(JwtAuthGuard)
@@ -44,13 +50,9 @@ export class ShopController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post(':category/:id/buy')
-  buyConsumable(
-    @Req() req: any,
-    @Param('category') category: PurchaseCategory,
-    @Param('id') id: string,
-  ) {
-    return this.shopService.buyConsumable(req.user.userId, category, id);
+  @Post('items/:id/buy')
+  buyConsumable(@Req() req: any, @Param('id') id: string) {
+    return this.shopService.buyConsumable(req.user.userId, id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -84,6 +86,27 @@ export class ShopController {
   @Delete('titles/:id')
   removeTitle(@Param('id') id: string) {
     return this.shopService.removeTitle(id);
+  }
+
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Post('sections')
+  createSection(@Body() dto: CreateShopSectionDto) {
+    return this.shopService.createSection(dto);
+  }
+
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Patch('sections/:id')
+  updateSection(@Param('id') id: string, @Body() dto: UpdateShopSectionDto) {
+    return this.shopService.updateSection(id, dto);
+  }
+
+  @UseGuards(AdminJwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Delete('sections/:id')
+  removeSection(@Param('id') id: string) {
+    return this.shopService.removeSection(id);
   }
 
   @UseGuards(AdminJwtAuthGuard, RolesGuard)

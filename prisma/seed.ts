@@ -371,10 +371,21 @@ async function main() {
     });
   }
 
+  await prisma.shopSection.upsert({
+    where: { id: 'potions' },
+    create: { id: 'potions', name: 'Зелья', icon: '🧪', order: 0 },
+    update: {},
+  });
+  await prisma.shopSection.upsert({
+    where: { id: 'snacks' },
+    create: { id: 'snacks', name: 'Пойки', icon: '🍪', order: 1 },
+    update: {},
+  });
+
   for (const [i, p] of SHOP_POTIONS.entries()) {
     await prisma.shopItem.upsert({
       where: { id: p.id },
-      create: { ...p, category: 'POTION', order: i },
+      create: { ...p, sectionId: 'potions', order: i },
       update: { name: p.name, price: p.price, order: i },
     });
   }
@@ -382,7 +393,7 @@ async function main() {
   for (const [i, s] of SHOP_SNACKS.entries()) {
     await prisma.shopItem.upsert({
       where: { id: s.id },
-      create: { ...s, category: 'SNACK', order: i },
+      create: { ...s, sectionId: 'snacks', order: i },
       update: { name: s.name, price: s.price, order: i },
     });
   }
