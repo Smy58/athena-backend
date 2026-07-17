@@ -13,7 +13,6 @@ export class CreateGameDto {
   @IsOptional() @IsInt() levelMax?: number;
   @IsOptional() @IsBoolean() forBeginners?: boolean;
   @IsInt() totalSeats: number;
-  @IsOptional() @IsInt() bookedSeats?: number;
   @IsOptional() @IsInt() price?: number;
   @IsOptional() @IsString() currency?: string;
   @IsString() shortDescription: string;
@@ -33,7 +32,6 @@ export class UpdateGameDto {
   @IsOptional() @IsInt() levelMax?: number;
   @IsOptional() @IsBoolean() forBeginners?: boolean;
   @IsOptional() @IsInt() totalSeats?: number;
-  @IsOptional() @IsInt() bookedSeats?: number;
   @IsOptional() @IsInt() price?: number;
   @IsOptional() @IsString() currency?: string;
   @IsOptional() @IsString() shortDescription?: string;
