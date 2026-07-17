@@ -297,6 +297,39 @@ const SCHEDULE_HISTORY = [
   { date: new Date('2026-06-08'), name: 'Турнир импровизации', meta: 'Мастер: Данияр · 16:00 · открытый набор', typeLabel: 'Ивент' },
 ];
 
+const SHOP_TITLES = [
+  { id: 'newbie', name: 'Новичок квартала', price: 15 },
+  { id: 'cat_tail', name: 'Хвост Кошки', price: 35 },
+  { id: 'goblin_slayer', name: 'Истребитель гоблинов', price: 40 },
+  { id: 'secret_keeper', name: 'Хранитель тайн', price: 70 },
+  { id: 'blade_master', name: 'Мастер клинка', price: 60 },
+  { id: 'shadow', name: 'Тень переулков', price: 50 },
+  { id: 'dungeon_scourge', name: 'Бич подземелий', price: 90 },
+  { id: 'dragonslayer', name: 'Драконоборец', price: 150 },
+  { id: 'archmage', name: 'Архимаг', price: 120 },
+  { id: 'legend', name: 'Легенда Афины', price: 300 },
+];
+
+const SHOP_POTIONS = [
+  { id: 'water', name: '💧 Вода', price: 5 },
+  { id: 'tea', name: '🍵 Чай', price: 10 },
+  { id: 'juice', name: '🧃 Сок', price: 12 },
+  { id: 'coffee', name: '☕ Кофе', price: 15 },
+  { id: 'soda', name: '🥤 Газировка', price: 15 },
+  { id: 'energy', name: '⚡ Энергетик', price: 20 },
+  { id: 'mulled_wine', name: '🍷 Глинтвейн (безалк.)', price: 25 },
+];
+
+const SHOP_SNACKS = [
+  { id: 'cookies', name: '🍪 Печенье', price: 10 },
+  { id: 'nuts', name: '🥜 Орешки', price: 10 },
+  { id: 'chocolate', name: '🍫 Шоколадка', price: 12 },
+  { id: 'popcorn', name: '🍿 Попкорн', price: 12 },
+  { id: 'chips', name: '🍟 Чипсы', price: 15 },
+  { id: 'pizza', name: '🍕 Кусок пиццы', price: 20 },
+  { id: 'sandwich', name: '🥪 Сэндвич', price: 25 },
+];
+
 async function main() {
   await prisma.faq.deleteMany();
   await prisma.faq.createMany({
@@ -329,6 +362,30 @@ async function main() {
 
   await prisma.scheduleHistory.deleteMany();
   await prisma.scheduleHistory.createMany({ data: SCHEDULE_HISTORY });
+
+  for (const [i, t] of SHOP_TITLES.entries()) {
+    await prisma.shopTitle.upsert({
+      where: { id: t.id },
+      create: { ...t, order: i },
+      update: { name: t.name, price: t.price, order: i },
+    });
+  }
+
+  for (const [i, p] of SHOP_POTIONS.entries()) {
+    await prisma.shopItem.upsert({
+      where: { id: p.id },
+      create: { ...p, category: 'POTION', order: i },
+      update: { name: p.name, price: p.price, order: i },
+    });
+  }
+
+  for (const [i, s] of SHOP_SNACKS.entries()) {
+    await prisma.shopItem.upsert({
+      where: { id: s.id },
+      create: { ...s, category: 'SNACK', order: i },
+      update: { name: s.name, price: s.price, order: i },
+    });
+  }
 
   const existingAdmin = await prisma.adminUser.findUnique({ where: { login: 'admin' } });
   if (!existingAdmin) {

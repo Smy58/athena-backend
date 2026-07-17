@@ -6,18 +6,28 @@ import {
 import { PurchaseCategory } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { omitPasswordHash } from '../common/omit-password';
-import { SHOP_TITLES, SHOP_POTIONS, SHOP_SNACKS } from './shop.catalog';
+import {
+  CreateShopTitleDto,
+  UpdateShopTitleDto,
+  CreateShopItemDto,
+  UpdateShopItemDto,
+} from './dto/shop.dto';
 
 @Injectable()
 export class ShopService {
   constructor(private prisma: PrismaService) {}
 
-  catalog() {
-    return { titles: SHOP_TITLES, potions: SHOP_POTIONS, snacks: SHOP_SNACKS };
+  async catalog() {
+    const [titles, potions, snacks] = await Promise.all([
+      this.prisma.shopTitle.findMany({ orderBy: { order: 'asc' } }),
+      this.prisma.shopItem.findMany({ where: { category: 'POTION' }, orderBy: { order: 'asc' } }),
+      this.prisma.shopItem.findMany({ where: { category: 'SNACK' }, orderBy: { order: 'asc' } }),
+    ]);
+    return { titles, potions, snacks };
   }
 
   async buyTitle(userId: string, titleId: string) {
-    const title = SHOP_TITLES.find((t) => t.id === titleId);
+    const title = await this.prisma.shopTitle.findUnique({ where: { id: titleId } });
     if (!title) throw new NotFoundException('Звание не найдено');
 
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
@@ -48,8 +58,7 @@ export class ShopService {
     category: PurchaseCategory,
     itemId: string,
   ) {
-    const list = category === 'POTION' ? SHOP_POTIONS : SHOP_SNACKS;
-    const item = list.find((i) => i.id === itemId);
+    const item = await this.prisma.shopItem.findFirst({ where: { id: itemId, category } });
     if (!item) throw new NotFoundException('Товар не найден');
 
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
@@ -77,5 +86,29 @@ export class ShopService {
       where: { id: purchaseId },
       data: { redeemed: true },
     });
+  }
+
+  createTitle(dto: CreateShopTitleDto) {
+    return this.prisma.shopTitle.create({ data: dto });
+  }
+
+  updateTitle(id: string, dto: UpdateShopTitleDto) {
+    return this.prisma.shopTitle.update({ where: { id }, data: dto });
+  }
+
+  removeTitle(id: string) {
+    return this.prisma.shopTitle.delete({ where: { id } });
+  }
+
+  createItem(dto: CreateShopItemDto) {
+    return this.prisma.shopItem.create({ data: dto });
+  }
+
+  updateItem(id: string, dto: UpdateShopItemDto) {
+    return this.prisma.shopItem.update({ where: { id }, data: dto });
+  }
+
+  removeItem(id: string) {
+    return this.prisma.shopItem.delete({ where: { id } });
   }
 }

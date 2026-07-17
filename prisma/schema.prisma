@@ -317,6 +317,21 @@ model ScheduleHistory {
   createdAt DateTime @default(now())
 }
 
+model ShopTitle {
+  id    String @id // slug, e.g. 'legend' — also referenced by User.titles/activeTitle
+  name  String
+  price Int
+  order Int    @default(0)
+}
+
+model ShopItem {
+  id       String           @id // slug, e.g. 'water' — also referenced by Purchase.itemId
+  name     String
+  price    Int
+  category PurchaseCategory
+  order    Int              @default(0)
+}
+
 model AdminUser {
   id           String    @id @default(cuid())
   login        String    @unique
